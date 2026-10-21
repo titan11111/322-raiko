@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+  <title>雷鼓 — 一打に、魂を。</title>
+  <link rel="stylesheet" href="style.css?v=20261021-zoom">
+</head>
+<body>
+  <canvas id="stage" aria-label="太鼓奏者の3D舞台"></canvas>
+  <div class="vignette" aria-hidden="true"></div>
+  <header class="play-header">
+    <div class="brand"><strong>雷鼓</strong></div>
+    <nav aria-label="ゲームの操作">
+      <button id="sound" class="icon-button" aria-label="音を消す" aria-pressed="false" title="音を消す"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path class="sound-waves" d="M15 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/><path class="sound-cross" d="m16 9 5 6m0-6-5 6"/></svg></button>
+      <button id="pause" class="icon-button" aria-label="一時停止" title="一時停止"><svg class="pause-symbol" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14M16 5v14"/></svg><svg class="play-symbol" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 5 11 7-11 7V5Z"/></svg></button>
+      <button id="settingsToggle" class="icon-button" aria-label="設定を開く" aria-controls="settings" aria-expanded="false" title="設定"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/><path d="M8 3v6m8 0v6M10 15v6"/></svg></button>
+    </nav>
+  </header>
+  <div id="instrument-list" class="instrument-list" role="group" aria-label="楽器を選ぶ">
+    <button data-instrument="odaiko" aria-pressed="true" class="selected">大太鼓</button>
+    <button data-instrument="nagado" aria-pressed="false">長胴太鼓</button>
+    <button data-instrument="shime" aria-pressed="false">締太鼓</button>
+    <button data-instrument="okedo" aria-pressed="false">桶胴太鼓</button>
+    <button data-instrument="tsuzumi" aria-pressed="false">小鼓</button>
+    <button data-instrument="snare" aria-pressed="false">スネア</button>
+    <button data-instrument="kit" aria-pressed="false" aria-label="ドラムセット">ドラム</button>
+    <button data-instrument="djembe" aria-pressed="false">ジャンベ</button>
+  </div>
+  <footer class="play-footer">
+    <p id="padStatus">USBコントローラーは、ボタンを一度押すと認識します。</p>
+    <div class="hands" role="group" aria-label="面と縁を左右で打つ">
+      <button id="left" data-play-kind="head" aria-label="面を左のバチで打つ Eキー"><span class="key" aria-hidden="true">E</span><span class="hand-copy"><span id="leftHandLabel">面 左</span><small class="charge-label">長押し：強打</small></span></button>
+      <button id="right" data-play-kind="head" aria-label="面を右のバチで打つ Oキー"><span class="key" aria-hidden="true">O</span><span class="hand-copy"><span id="rightHandLabel">面 右</span><small class="charge-label">長押し：強打</small></span></button>
+      <button id="leftRim" data-play-kind="rim" aria-label="縁を左のバチで打つ Fキー"><span class="key" aria-hidden="true">F</span><span class="hand-copy"><span id="leftRimLabel">縁 左</span><small class="charge-label">長押し：強打</small></span></button>
+      <button id="rightRim" data-play-kind="rim" aria-label="縁を右のバチで打つ Jキー"><span class="key" aria-hidden="true">J</span><span class="hand-copy"><span id="rightRimLabel">縁 右</span><small class="charge-label">長押し：強打</small></span></button>
+    </div>
+  </footer>
+  <div id="impact" aria-live="polite"></div>
+  <div id="paused" hidden><strong>一時停止</strong><button id="resume">再開</button></div>
+  <div id="error" role="alert" hidden></div>
+  <section id="settings" role="dialog" aria-modal="true" aria-labelledby="settingsTitle" hidden>
+    <div class="settings-panel" tabindex="-1">
+      <div class="settings-heading"><h2 id="settingsTitle">設定</h2><button id="settingsClose" class="icon-button" aria-label="設定を閉じる" title="閉じる"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
+      <div class="settings-body">
+        <fieldset><legend>演奏</legend>
+          <label for="volume">音量<input id="volume" type="range" min="0" max="100" value="70"></label>
+          <label for="speed">動きの速さ<select id="speed"><option value="1">通常</option><option value="0.25">スロー ×0.25</option></select></label>
+          <div class="setting-row"><span id="cameraLabel">視点</span><div class="camera segmented" role="group" aria-labelledby="cameraLabel"><button data-camera="stage" class="selected" aria-pressed="true">舞台</button><button data-camera="shoulder" aria-pressed="false">肩越し</button><button data-camera="side" aria-pressed="false">側面</button></div></div>
+          <div class="setting-row stroke-setting"><span id="strokeLabel">マウス</span><div class="stroke-mode segmented" role="group" aria-labelledby="strokeLabel"><button data-stroke="head" class="selected" aria-pressed="true">面 · ドン</button><button data-stroke="rim" aria-pressed="false">縁 · カッ</button></div></div>
+        </fieldset>
+        <fieldset><legend>舞台</legend>
+          <label for="performer">奏者<select id="performer"><option value="auto">楽器に合わせる</option><option value="souma">蒼真 · 祭り装束</option><option value="akari">朱音 · ライブ衣装</option><option value="shigure">時雨 · 和装</option></select></label>
+          <label for="venue">場所<select id="venue"><option value="auto">楽器に合わせる</option><option value="festival">夜祭の境内</option><option value="live">ライブハウス</option><option value="garden">月夜の竹林庭園</option></select></label>
+          <label for="quality">描画品質<select id="quality"><option value="high">高画質</option><option value="low">軽量</option></select></label>
+          <label for="debug">打点を表示<input id="debug" type="checkbox"></label>
+          <p id="look-caption"></p><p id="precision">接触すると、バチ先の精度を表示します。</p>
+        </fieldset>
+        <details class="play-help"><summary>操作ガイド</summary><p id="instrumentHint">左右で面打ち。縁に切り替えるとカッ。</p><p class="bottomnote">面 E・O ／ 縁 F・J ／ 長押しで強打<span>左右は奏者自身の左手・右手です。</span></p><p>マウスは左・右クリック。長押しして離すと強打。</p><p>USBコントローラーは、ZLと左のボタンと十字キー左が面の左、ZRと下のボタンと十字キー右が面の右。上のボタンとLが縁の左、右のボタンとRが縁の右。スティックは横が面、縦が縁。Startで停止、Selectで消音。</p></details>
+        <div class="progress" aria-label="奏者の成長"><span>稽古の記録</span><strong id="level">壱</strong><div class="xp"><i id="xpFill"></i></div><small id="xp">0 / 30 打</small></div>
+      </div>
+    </div>
+  </section>
+  <section class="intro" hidden aria-hidden="true"><h1>一打に、魂を。</h1><p>息を整える。構える。</p></section>
+  <select id="instrument" hidden aria-hidden="true" tabindex="-1"><option value="odaiko">大太鼓</option><option value="nagado">長胴太鼓</option><option value="shime">締太鼓</option><option value="okedo">桶胴太鼓</option><option value="tsuzumi">小鼓</option><option value="snare">スネアドラム</option><option value="kit">ドラムセット</option><option value="djembe">ジャンベ</option></select>
+  <span id="instrumentName" hidden>大太鼓</span>
+  <script src="three.min.js"></script><script src="controls.js?v=20261021-zoom"></script><script src="instruments.js"></script><script src="human-rig.js?v=20261017-wrist2"></script><script src="hand-rig.js?v=20261017-wrist2"></script><script src="cymbal-audio.js"></script><script src="stage-wardrobe.js"></script><script src="performer-layout.js?v=20261017-motion3"></script><script src="taiko-motion.js?v=20261017-shoulder2"></script><script src="gamepad.js?v=20261018-zl"></script><script src="game.js?v=20261021-zoom"></script>
+</body>
+</html>
